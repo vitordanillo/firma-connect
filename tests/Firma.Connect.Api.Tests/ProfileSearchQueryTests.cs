@@ -10,7 +10,7 @@ public class ProfileSearchQueryTests
     [InlineData(2, 20, 20)]
     public void Skip_is_calculated_from_page(int page, int pageSize, int expectedSkip)
     {
-        var query = new ProfileSearchQuery(null, true, null, page, pageSize);
+        var query = new ProfileSearchQuery(null, true, null, Page: page, PageSize: pageSize);
         var normalizedPage = Math.Max(query.Page, 1);
 
         Assert.Equal(expectedSkip, (normalizedPage - 1) * query.PageSize);
