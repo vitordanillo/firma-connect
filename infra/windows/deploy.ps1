@@ -20,6 +20,9 @@ dotnet publish '.\src\Firma.Connect.Api\Firma.Connect.Api.csproj' `
     --configuration Release `
     --output $ApiPublishPath `
     --no-restore
+if ($LASTEXITCODE -ne 0) {
+    throw 'A publicação da API falhou.'
+}
 
 Push-Location '.\src\firma-connect-web'
 try {
@@ -29,7 +32,13 @@ try {
     else {
         npm install
     }
+    if ($LASTEXITCODE -ne 0) {
+        throw 'A instalação das dependências do frontend falhou.'
+    }
     npm run build
+    if ($LASTEXITCODE -ne 0) {
+        throw 'O build do frontend falhou.'
+    }
 }
 finally {
     Pop-Location
