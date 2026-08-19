@@ -12,7 +12,7 @@ public sealed class JwtTokenService(IOptions<JwtOptions> options, TimeProvider t
 {
     private readonly JwtOptions _options = options.Value;
 
-    public AuthResponse Create(User user)
+    public AuthResponse Create(User user, IReadOnlyCollection<CommunityAccessItem> communities)
     {
         var now = timeProvider.GetUtcNow();
         var expiresAt = now.AddMinutes(_options.ExpirationMinutes);
@@ -34,6 +34,11 @@ public sealed class JwtTokenService(IOptions<JwtOptions> options, TimeProvider t
             expires: expiresAt.UtcDateTime,
             signingCredentials: credentials);
 
-        return new AuthResponse(new JwtSecurityTokenHandler().WriteToken(token), expiresAt, user.Id, user.DisplayName);
+        return new AuthResponse(
+            new JwtSecurityTokenHandler().WriteToken(token),
+            expiresAt,
+            user.Id,
+            user.DisplayName,
+            communities);
     }
 }

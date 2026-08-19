@@ -31,7 +31,8 @@ public sealed class ProfileDirectoryService(FirmaDbContext db)
             var term = query.Query.Trim().ToLower();
             profiles = profiles.Where(profile =>
                 (profile.Course != null && profile.Course.ToLower().Contains(term)) ||
-                (profile.Headline != null && profile.Headline.ToLower().Contains(term)));
+                (profile.Headline != null && profile.Headline.ToLower().Contains(term)) ||
+                db.Users.Any(user => user.Id == profile.UserId && user.DisplayName.ToLower().Contains(term)));
         }
 
         var total = await profiles.CountAsync(cancellationToken);

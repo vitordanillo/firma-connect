@@ -52,7 +52,8 @@ public sealed class AuthService(
         await db.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
 
-        return AuthResult.Success(tokenService.Create(user));
+        var communities = await LoadCommunitiesAsync(user.Id, cancellationToken);
+        return AuthResult.Success(tokenService.Create(user, communities));
     }
 
     public async Task<AuthResult> LoginAsync(LoginRequest request, CancellationToken cancellationToken)
@@ -76,6 +77,21 @@ public sealed class AuthService(
             await db.SaveChangesAsync(cancellationToken);
         }
 
-        return AuthResult.Success(tokenService.Create(user));
+        var communities = await LoadCommunitiesAsync(user.Id, cancellationToken);
+        return AuthResult.Success(tokenService.Create(user, communities));
     }
+
+    private async Task<IReadOnlyCollection<CommunityAccessItem>> LoadCommunitiesAsync(
+        Guid userId,
+        CancellationToken cancellationToken)
+        => await db.CommunityMemberships
+            .AsNoTracking()
+            .Where(membership => membership.UserId == userId)
+            .Join(db.Communities.AsNoTracking(), membership => membership.CommunityId, community => community.Id,
+                (membership, community) => new CommunityAccessItem(
+                    community.Id,
+                    community.Name,
+                    membership.Role.ToString().ToLowerInvariant()))
+            .OrderBy(community => community.Name)
+            .ToListAsync(cancellationToken);
 }
