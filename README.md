@@ -1,5 +1,9 @@
 # Firma Connect
 
+> Plataforma open source de networking e formação de equipes para comunidades, criada inicialmente para validar o contexto do Sebrae Supernova.
+
+Para retomar o projeto, leia [`docs/STATUS_E_DESENVOLVIMENTO.md`](docs/STATUS_E_DESENVOLVIMENTO.md), que registra o escopo, a arquitetura em produção, o histórico de decisões e os próximos passos.
+
 Plataforma de descoberta profissional para comunidades. Este repositório inicia o piloto que poderá ser apresentado aos administradores de uma comunidade de estudantes; não é um produto oficial do Sebrae ou do Supernova.
 
 ## O problema
