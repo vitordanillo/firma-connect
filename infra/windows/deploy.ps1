@@ -26,7 +26,12 @@ dotnet publish '.\src\Firma.Connect.Api\Firma.Connect.Api.csproj' `
 
 Push-Location '.\src\firma-connect-web'
 try {
-    npm ci
+    if (Test-Path -LiteralPath '.\package-lock.json') {
+        npm ci
+    }
+    else {
+        npm install
+    }
     npm run build
 }
 finally {
