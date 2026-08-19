@@ -82,6 +82,21 @@ public sealed class TeamService(FirmaDbContext db, TimeProvider timeProvider)
         return new TeamSearchResponse(items, total);
     }
 
+    public async Task<OwnTeamResponse?> GetOwnTeamAsync(
+        Guid communityId,
+        Guid userId,
+        CancellationToken cancellationToken)
+    {
+        var membership = await db.TeamMembers.AsNoTracking().SingleOrDefaultAsync(
+            item => item.CommunityId == communityId && item.UserId == userId,
+            cancellationToken);
+        if (membership is null) return null;
+
+        return new OwnTeamResponse(
+            await MapTeamAsync(membership.TeamId, cancellationToken),
+            membership.Role.ToString().ToLowerInvariant());
+    }
+
     public async Task<TeamResult<TeamJoinRequestItem>> RequestToJoinAsync(
         Guid communityId, Guid teamId, Guid userId, CreateTeamJoinRequest request, CancellationToken cancellationToken)
     {

@@ -200,6 +200,20 @@ app.MapGet("/api/communities/{communityId:guid}/team-discovery/summary", async (
         : Results.Ok(summary);
 }).RequireAuthorization();
 
+app.MapGet("/api/communities/{communityId:guid}/teams/me", async (
+    Guid communityId,
+    HttpContext context,
+    CommunityAccessService access,
+    TeamService teams,
+    CancellationToken cancellationToken) =>
+{
+    var userId = context.User.GetUserId();
+    if (userId is null) return Results.Unauthorized();
+    if (!await access.IsMemberAsync(communityId, userId.Value, cancellationToken)) return Results.Forbid();
+    var team = await teams.GetOwnTeamAsync(communityId, userId.Value, cancellationToken);
+    return team is null ? Results.NotFound() : Results.Ok(team);
+}).RequireAuthorization();
+
 app.MapPost("/api/communities/{communityId:guid}/teams", async (
     Guid communityId,
     CreateTeamRequest request,
