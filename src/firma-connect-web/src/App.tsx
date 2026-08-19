@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useState } from 'react'
-import { ApiError, api, AuthSession, DirectoryProfile, Institution, OwnProfile, Team } from './api'
+import { ApiError, api, AuthSession, DirectoryProfile, Institution, OwnProfile, OwnTeam, Team, TeamJoinRequest } from './api'
 
 const SESSION_KEY = 'firma-connect-session'
 
@@ -59,11 +59,58 @@ function PeopleDirectory({ session, communityId, institutions }: { session: Auth
 }
 
 function TeamsDirectory({ session, communityId }: { session: AuthSession; communityId: string }) {
-  const [teams, setTeams] = useState<Team[]>([]); const [skill, setSkill] = useState(''); const [error, setError] = useState(''); const [creating, setCreating] = useState(false)
-  const load = () => { const params = new URLSearchParams({ openOnly: 'true', sameInstitutionFirst: 'true' }); if (skill) params.set('skill', skill); api<{ items: Team[] }>(`/api/communities/${communityId}/teams?${params}`, {}, session.accessToken).then(result => { setTeams(result.items); setError('') }).catch(exception => setError(exception.message)) }
+  const [teams, setTeams] = useState<Team[]>([])
+  const [ownTeam, setOwnTeam] = useState<OwnTeam | null>(null)
+  const [requests, setRequests] = useState<TeamJoinRequest[]>([])
+  const [skill, setSkill] = useState('')
+  const [message, setMessage] = useState('')
+  const [creating, setCreating] = useState(false)
+
+  function load() {
+    const params = new URLSearchParams({ openOnly: 'true', sameInstitutionFirst: 'true' })
+    if (skill) params.set('skill', skill)
+    api<{ items: Team[] }>(`/api/communities/${communityId}/teams?${params}`, {}, session.accessToken)
+      .then(result => setTeams(result.items)).catch(exception => setMessage(exception.message))
+    api<OwnTeam>(`/api/communities/${communityId}/teams/me`, {}, session.accessToken)
+      .then(team => { setOwnTeam(team); if (team.role === 'owner') loadRequests(team.team.id) })
+      .catch(exception => { if (!(exception instanceof ApiError) || exception.status !== 404) setMessage(exception.message) })
+  }
+
+  function loadRequests(teamId: string) {
+    api<TeamJoinRequest[]>(`/api/communities/${communityId}/teams/${teamId}/requests`, {}, session.accessToken)
+      .then(setRequests).catch(exception => setMessage(exception.message))
+  }
+
   useEffect(load, [communityId, session.accessToken, skill])
-  async function request(teamId: string) { try { await api(`/api/communities/${communityId}/teams/${teamId}/requests`, { method: 'POST', body: JSON.stringify({ note: 'Tenho interesse em conhecer o projeto e contribuir com a equipe.' }) }, session.accessToken); setError('Solicitação enviada.') } catch (exception) { setError(exception instanceof ApiError ? exception.message : 'Não foi possível enviar.') } }
-  return <section className="directory"><div className="section-heading"><div><p className="eyebrow">EQUIPES ABERTAS</p><h2>Projetos da sua instituição aparecem primeiro.</h2></div><button className="primary" onClick={() => setCreating(value => !value)}>Criar equipe</button></div>{creating && <CreateTeamForm session={session} communityId={communityId} onCreated={() => { setCreating(false); load() }} />}<div className="filters"><input placeholder="Competência procurada" value={skill} onChange={event => setSkill(event.target.value)} /></div>{error && <p className="form-message">{error}</p>}<div className="cards">{teams.map(team => <article className="card" key={team.id}><div><h3>{team.name}</h3><p className="meta">{team.institution} · {team.memberCount}/4 integrantes</p><p>{team.projectSummary}</p><div className="tags">{team.desiredSkills.map(item => <span key={item}>{item}</span>)}</div><button className="connect" onClick={() => request(team.id)}>Solicitar entrada</button></div></article>)}</div></section>
+
+  async function request(teamId: string) {
+    try {
+      await api(`/api/communities/${communityId}/teams/${teamId}/requests`, { method: 'POST', body: JSON.stringify({ note: 'Tenho interesse em conhecer o projeto e contribuir com a equipe.' }) }, session.accessToken)
+      setMessage('Solicitação enviada para o responsável.')
+    } catch (exception) { setMessage(exception instanceof ApiError ? exception.message : 'Não foi possível enviar.') }
+  }
+
+  async function respond(requestId: string, action: 'accept' | 'decline') {
+    try {
+      await api(`/api/communities/${communityId}/team-requests/${requestId}/${action}`, { method: 'POST' }, session.accessToken)
+      setMessage(action === 'accept' ? 'Participante aceito na equipe.' : 'Solicitação recusada.')
+      load()
+    } catch (exception) { setMessage(exception instanceof ApiError ? exception.message : 'Não foi possível responder.') }
+  }
+
+  return <section className="directory">
+    <div className="section-heading"><div><p className="eyebrow">EQUIPES</p><h2>Projetos da sua instituição aparecem primeiro.</h2></div>{!ownTeam && <button className="primary" onClick={() => setCreating(value => !value)}>Criar equipe</button>}</div>
+    {ownTeam && <OwnTeamPanel ownTeam={ownTeam} requests={requests} onRespond={respond} />}
+    {creating && <CreateTeamForm session={session} communityId={communityId} onCreated={() => { setCreating(false); load() }} />}
+    <div className="filters"><input placeholder="Competência procurada" value={skill} onChange={event => setSkill(event.target.value)} /></div>
+    {message && <p className="form-message" role="status">{message}</p>}
+    <div className="cards">{teams.filter(team => team.id !== ownTeam?.team.id).map(team => <article className="card" key={team.id}><div><h3>{team.name}</h3><p className="meta">{team.institution} · {team.memberCount}/4 integrantes</p><p>{team.projectSummary}</p><div className="tags">{team.desiredSkills.map(item => <span key={item}>{item}</span>)}</div>{!ownTeam && <button className="connect" onClick={() => request(team.id)}>Solicitar entrada</button>}</div></article>)}</div>
+  </section>
+}
+
+function OwnTeamPanel({ ownTeam, requests, onRespond }: { ownTeam: OwnTeam; requests: TeamJoinRequest[]; onRespond: (id: string, action: 'accept' | 'decline') => void }) {
+  const pending = requests.filter(request => request.status === 'pending')
+  return <section className="team-panel"><div><p className="eyebrow">MINHA EQUIPE</p><h3>{ownTeam.team.name}</h3><p>{ownTeam.team.memberCount}/4 integrantes · {ownTeam.team.openSpots} vagas abertas</p></div>{ownTeam.role === 'owner' && <div className="request-list"><h4>Solicitações pendentes</h4>{pending.map(request => <article className="request-item" key={request.id}><div><strong>{request.requesterName}</strong><p>{request.note}</p></div><div><button className="approve" onClick={() => onRespond(request.id, 'accept')}>Aceitar</button><button className="reject" onClick={() => onRespond(request.id, 'decline')}>Recusar</button></div></article>)}{!pending.length && <p className="muted">Nenhuma solicitação pendente.</p>}</div>}</section>
 }
 
 function CreateTeamForm({ session, communityId, onCreated }: { session: AuthSession; communityId: string; onCreated: () => void }) {

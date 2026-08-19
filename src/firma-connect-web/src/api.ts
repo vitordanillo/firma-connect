@@ -6,6 +6,8 @@ export type DirectoryProfile = { id: string; displayName: string; institution: s
 export type OwnProfile = { institutionId: string | null; course: string | null; headline: string | null; bio: string | null; projectName: string | null; projectSummary: string | null; canHelpWith: string | null; lookingFor: string | null; contactUrl: string | null; teamSituation: TeamSituation; skills: string[]; interests: string[]; visibleInDirectory: boolean }
 export type Team = { id: string; name: string; institution: string; projectSummary: string | null; isOpen: boolean; memberCount: number; openSpots: number; desiredSkills: string[] }
 export type TeamDiscoverySummary = { institutionId: string; institution: string; participants: number; lookingForTeam: number; openTeams: number; alreadyInTeam: number }
+export type OwnTeam = { team: Team; role: 'owner' | 'member' }
+export type TeamJoinRequest = { id: string; teamId: string; requesterProfileId: string; requesterName: string; note: string | null; status: 'pending' | 'accepted' | 'declined' | 'cancelled'; createdAt: string }
 
 export class ApiError extends Error {
   constructor(public status: number, message: string) { super(message) }
