@@ -35,6 +35,7 @@ builder.Services.AddScoped<InvitationService>();
 builder.Services.AddScoped<TeamService>();
 builder.Services.AddScoped<TeamDiscoveryService>();
 builder.Services.AddScoped<BootstrapSeeder>();
+builder.Services.AddSingleton<JwtTokenService>();
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection(JwtOptions.SectionName));
