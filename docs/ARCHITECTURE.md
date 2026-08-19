@@ -18,7 +18,9 @@ O banco usa UUIDs, `timestamptz`, `citext` para e-mails e índices nas colunas d
 
 ## Segurança e privacidade
 
-- JWT de curta duração; refresh token armazenado com hash quando a autenticação for implementada.
+- JWT de curta duração e senha protegida pelo `PasswordHasher` do ASP.NET Core.
+- Cadastro somente por convite de uso único, associado a um e-mail e armazenado apenas como hash SHA-256.
+- Criação de convites restrita a administradores da comunidade.
 - Senhas nunca entram no banco sem hash (Argon2id ou ASP.NET Identity).
 - Rate limit em login, busca e pedidos de conexão.
 - Autorizações sempre verificam `community_id`; nunca confiar em IDs vindos do cliente.
@@ -29,13 +31,19 @@ O banco usa UUIDs, `timestamptz`, `citext` para e-mails e índices nas colunas d
 
 `GET /health` saúde do serviço.
 
+`POST /api/auth/register` cria a conta a partir de um convite válido e associa o usuário à comunidade.
+
+`POST /api/auth/login` autentica e retorna um JWT com duração configurável.
+
+`POST /api/communities/{communityId}/invitations` cria um convite de três dias; exige administrador autenticado.
+
 `GET /api/communities/{communityId}/profiles?institutionId=&availableForTeam=&query=&page=&pageSize=` lista perfis visíveis no diretório. O primeiro endpoint foi implementado, mas ainda precisa de autenticação e verificação de associação à comunidade antes de produção.
 
 `POST /api/communities/{communityId}/profiles` cria ou atualiza o próprio perfil.
 
 `POST /api/connection-requests` envia pedido; `POST /api/connection-requests/{id}/accept` aceita; `POST /api/connection-requests/{id}/decline` recusa.
 
-Os endpoints de perfil e conexão são o primeiro recorte. Autorização e fluxo de convite devem ser implementados antes da exposição pública.
+O diretório e a criação de convites verificam a associação à comunidade no banco em cada requisição. O token não concede acesso a uma comunidade por si só.
 
 ## Estratégia de testes
 

@@ -21,7 +21,7 @@ Mensagens privadas, recomendações por IA, feed, pagamento e integração com W
 ## Estrutura
 
 ```
-src/Firma.Connect.Api       API ASP.NET Core 8 + EF Core
+src/Firma.Connect.Api       API ASP.NET Core 8 + EF Core + JWT
 src/firma-connect-web       React + TypeScript + Vite
 tests/Firma.Connect.Api.Tests testes unitários da API
 infra/postgres              esquema inicial PostgreSQL
@@ -30,6 +30,6 @@ docs                        decisões de produto e arquitetura
 
 ## Desenvolvimento e VPS
 
-O projeto foi apenas estruturado neste ambiente; nenhum serviço, teste ou build foi executado. Consulte [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) para os comandos que devem ser usados no ambiente de desenvolvimento/VPS e [docs/PRODUCT.md](docs/PRODUCT.md) para preservar o contexto do produto.
+O projeto foi apenas estruturado neste ambiente; nenhum serviço, teste ou build foi executado. Consulte [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) para a arquitetura, [docs/AUTHENTICATION.md](docs/AUTHENTICATION.md) para o fluxo de acesso, [docs/ROADMAP.md](docs/ROADMAP.md) para o andamento e [docs/PRODUCT.md](docs/PRODUCT.md) para preservar o contexto do produto.
 
 Antes de publicar, configure segredos fora do Git com base em `.env.example`, use HTTPS por proxy reverso e substitua a autenticação de desenvolvimento por um provedor de e-mail/OTP real.
