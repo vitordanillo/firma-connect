@@ -88,10 +88,11 @@ public sealed class AuthService(
             .AsNoTracking()
             .Where(membership => membership.UserId == userId)
             .Join(db.Communities.AsNoTracking(), membership => membership.CommunityId, community => community.Id,
-                (membership, community) => new CommunityAccessItem(
-                    community.Id,
-                    community.Name,
-                    membership.Role.ToString().ToLowerInvariant()))
-            .OrderBy(community => community.Name)
+                (membership, community) => new { membership, community })
+            .OrderBy(item => item.community.Name)
+            .Select(item => new CommunityAccessItem(
+                item.community.Id,
+                item.community.Name,
+                item.membership.Role.ToString().ToLowerInvariant()))
             .ToListAsync(cancellationToken);
 }
