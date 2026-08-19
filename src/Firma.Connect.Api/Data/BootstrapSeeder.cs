@@ -38,6 +38,8 @@ public sealed class BootstrapSeeder(
             db.Communities.Add(community);
         }
 
+        await db.SaveChangesAsync(cancellationToken);
+
         var membership = await db.CommunityMemberships.SingleOrDefaultAsync(
             item => item.CommunityId == community.Id && item.UserId == user.Id, cancellationToken);
         if (membership is null)
