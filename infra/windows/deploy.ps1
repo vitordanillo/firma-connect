@@ -10,12 +10,9 @@ Set-StrictMode -Version Latest
 
 Set-Location -LiteralPath $RepoPath
 
+git config --global --add safe.directory $RepoPath
 git fetch origin main
 git reset --hard origin/main
-
-if (-not (Test-Path -LiteralPath '.env')) {
-    throw 'O arquivo .env não existe na VPS. Crie-o com as configurações de produção antes do deploy.'
-}
 
 New-Item -ItemType Directory -Force -Path $ApiPublishPath, $WebPublishPath | Out-Null
 

@@ -23,7 +23,7 @@ Antes do primeiro deploy, a VPS precisa ter:
 - Caddy configurado para servir `C:\opt\firma-connect\deploy\web` e encaminhar a API para o Kestrel;
 - o repositório clonado em `C:\opt\firma-connect`;
 - PM2 gerenciando um processo chamado `firma-api` para executar a API publicada;
-- um arquivo `.env` de produção em `C:\opt\firma-connect`.
+- `appsettings.Production.json` publicado junto com a API, contendo as configurações de produção fora do Git.
 
 O workflow não cria serviços, instala dependências nem cria credenciais. Essas etapas são deliberadamente separadas para evitar que uma execução automática altere a infraestrutura sem revisão.
 
