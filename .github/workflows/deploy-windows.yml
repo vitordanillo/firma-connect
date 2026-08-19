@@ -1,0 +1,27 @@
+name: Deploy na VPS Windows
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Publicar na VPS
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Instalar cliente SSH com senha
+        run: sudo apt-get update && sudo apt-get install -y sshpass
+
+      - name: Executar deploy remoto
+        env:
+          SSHPASS: ${{ secrets.VPS_PASSWORD }}
+        run: |
+          sshpass -e ssh \
+            -p "${{ secrets.VPS_PORT || 22 }}" \
+            -o StrictHostKeyChecking=no \
+            -o PreferredAuthentications=password \
+            -o PubkeyAuthentication=no \
+            "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" \
+            'powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File C:\opt\firma-connect\infra\windows\deploy.ps1'
