@@ -1,8 +1,11 @@
 export type CommunityAccess = { id: string; name: string; role: string }
 export type AuthSession = { accessToken: string; expiresAt: string; userId: string; displayName: string; communities: CommunityAccess[] }
 export type Institution = { id: string; name: string }
-export type DirectoryProfile = { id: string; displayName: string; institution: string | null; course: string | null; headline: string | null; availableForTeam: boolean }
-export type OwnProfile = { institutionId: string | null; course: string | null; headline: string | null; bio: string | null; contactUrl: string | null; availableForTeam: boolean; visibleInDirectory: boolean }
+export type TeamSituation = 'lookingForTeam' | 'hasTeam' | 'notLooking'
+export type DirectoryProfile = { id: string; displayName: string; institution: string | null; course: string | null; headline: string | null; projectName: string | null; canHelpWith: string | null; lookingFor: string | null; teamSituation: TeamSituation; skills: string[]; interests: string[] }
+export type OwnProfile = { institutionId: string | null; course: string | null; headline: string | null; bio: string | null; projectName: string | null; projectSummary: string | null; canHelpWith: string | null; lookingFor: string | null; contactUrl: string | null; teamSituation: TeamSituation; skills: string[]; interests: string[]; visibleInDirectory: boolean }
+export type Team = { id: string; name: string; institution: string; projectSummary: string | null; isOpen: boolean; memberCount: number; openSpots: number; desiredSkills: string[] }
+export type TeamDiscoverySummary = { institutionId: string; institution: string; participants: number; lookingForTeam: number; openTeams: number; alreadyInTeam: number }
 
 export class ApiError extends Error {
   constructor(public status: number, message: string) { super(message) }
