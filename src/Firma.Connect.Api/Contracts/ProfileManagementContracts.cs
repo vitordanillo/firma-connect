@@ -1,12 +1,20 @@
 namespace Firma.Connect.Api.Contracts;
 
+using Firma.Connect.Api.Domain;
+
 public sealed record UpsertProfileRequest(
     Guid? InstitutionId,
     string? Course,
     string? Headline,
     string? Bio,
+    string? ProjectName,
+    string? ProjectSummary,
+    string? CanHelpWith,
+    string? LookingFor,
     string? ContactUrl,
-    bool AvailableForTeam,
+    TeamSituation TeamSituation,
+    IReadOnlyCollection<string> Skills,
+    IReadOnlyCollection<string> Interests,
     bool VisibleInDirectory);
 
 public sealed record OwnProfileResponse(
@@ -17,7 +25,13 @@ public sealed record OwnProfileResponse(
     string? Course,
     string? Headline,
     string? Bio,
+    string? ProjectName,
+    string? ProjectSummary,
+    string? CanHelpWith,
+    string? LookingFor,
     string? ContactUrl,
-    bool AvailableForTeam,
+    TeamSituation TeamSituation,
+    IReadOnlyCollection<string> Skills,
+    IReadOnlyCollection<string> Interests,
     bool VisibleInDirectory,
     DateTimeOffset UpdatedAt);

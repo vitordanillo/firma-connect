@@ -5,14 +5,20 @@ using Firma.Connect.Api.Features.Auth;
 using Firma.Connect.Api.Features.Communities;
 using Firma.Connect.Api.Features.Institutions;
 using Firma.Connect.Api.Features.Profiles;
+using Firma.Connect.Api.Features.Teams;
 using Firma.Connect.Api.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.ConfigureHttpJsonOptions(options =>
+    options.SerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase)));
 
 builder.Services.AddDbContext<FirmaDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("Postgres"))
@@ -26,6 +32,8 @@ builder.Services.AddScoped<InstitutionDirectoryService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<CommunityAccessService>();
 builder.Services.AddScoped<InvitationService>();
+builder.Services.AddScoped<TeamService>();
+builder.Services.AddScoped<TeamDiscoveryService>();
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection(JwtOptions.SectionName));
@@ -162,6 +170,106 @@ app.MapDelete("/api/communities/{communityId:guid}/profiles/me", async (
     return deleted ? Results.NoContent() : Results.NotFound();
 }).RequireAuthorization();
 
+app.MapGet("/api/communities/{communityId:guid}/teams", async (
+    Guid communityId,
+    [AsParameters] TeamSearchQuery query,
+    HttpContext context,
+    CommunityAccessService access,
+    TeamService teams,
+    CancellationToken cancellationToken) =>
+{
+    var userId = context.User.GetUserId();
+    if (userId is null) return Results.Unauthorized();
+    if (!await access.IsMemberAsync(communityId, userId.Value, cancellationToken)) return Results.Forbid();
+    return Results.Ok(await teams.SearchAsync(communityId, userId.Value, query, cancellationToken));
+}).RequireAuthorization();
+
+app.MapGet("/api/communities/{communityId:guid}/team-discovery/summary", async (
+    Guid communityId,
+    HttpContext context,
+    CommunityAccessService access,
+    TeamDiscoveryService discovery,
+    CancellationToken cancellationToken) =>
+{
+    var userId = context.User.GetUserId();
+    if (userId is null) return Results.Unauthorized();
+    if (!await access.IsMemberAsync(communityId, userId.Value, cancellationToken)) return Results.Forbid();
+    var summary = await discovery.GetSummaryAsync(communityId, userId.Value, cancellationToken);
+    return summary is null
+        ? Results.BadRequest(new { error = "Preencha sua instituição para encontrar sua equipe." })
+        : Results.Ok(summary);
+}).RequireAuthorization();
+
+app.MapPost("/api/communities/{communityId:guid}/teams", async (
+    Guid communityId,
+    CreateTeamRequest request,
+    HttpContext context,
+    CommunityAccessService access,
+    TeamService teams,
+    CancellationToken cancellationToken) =>
+{
+    var userId = context.User.GetUserId();
+    if (userId is null) return Results.Unauthorized();
+    if (!await access.IsMemberAsync(communityId, userId.Value, cancellationToken)) return Results.Forbid();
+    var result = await teams.CreateAsync(communityId, userId.Value, request, cancellationToken);
+    return result.Succeeded ? Results.Ok(result.Value) : Results.BadRequest(new { error = result.Error });
+}).RequireAuthorization();
+
+app.MapPost("/api/communities/{communityId:guid}/teams/{teamId:guid}/requests", async (
+    Guid communityId,
+    Guid teamId,
+    CreateTeamJoinRequest request,
+    HttpContext context,
+    CommunityAccessService access,
+    TeamService teams,
+    CancellationToken cancellationToken) =>
+{
+    var userId = context.User.GetUserId();
+    if (userId is null) return Results.Unauthorized();
+    if (!await access.IsMemberAsync(communityId, userId.Value, cancellationToken)) return Results.Forbid();
+    var result = await teams.RequestToJoinAsync(communityId, teamId, userId.Value, request, cancellationToken);
+    return result.Succeeded ? Results.Ok(result.Value) : Results.BadRequest(new { error = result.Error });
+}).RequireAuthorization();
+
+app.MapGet("/api/communities/{communityId:guid}/teams/{teamId:guid}/requests", async (
+    Guid communityId,
+    Guid teamId,
+    HttpContext context,
+    TeamService teams,
+    CancellationToken cancellationToken) =>
+{
+    var userId = context.User.GetUserId();
+    if (userId is null) return Results.Unauthorized();
+    var result = await teams.ListRequestsAsync(communityId, teamId, userId.Value, cancellationToken);
+    return result.Succeeded ? Results.Ok(result.Value) : Results.Forbid();
+}).RequireAuthorization();
+
+app.MapPost("/api/communities/{communityId:guid}/team-requests/{requestId:guid}/accept", async (
+    Guid communityId,
+    Guid requestId,
+    HttpContext context,
+    TeamService teams,
+    CancellationToken cancellationToken) =>
+{
+    var userId = context.User.GetUserId();
+    if (userId is null) return Results.Unauthorized();
+    var result = await teams.RespondAsync(communityId, requestId, userId.Value, true, cancellationToken);
+    return result.Succeeded ? Results.Ok(result.Value) : Results.BadRequest(new { error = result.Error });
+}).RequireAuthorization();
+
+app.MapPost("/api/communities/{communityId:guid}/team-requests/{requestId:guid}/decline", async (
+    Guid communityId,
+    Guid requestId,
+    HttpContext context,
+    TeamService teams,
+    CancellationToken cancellationToken) =>
+{
+    var userId = context.User.GetUserId();
+    if (userId is null) return Results.Unauthorized();
+    var result = await teams.RespondAsync(communityId, requestId, userId.Value, false, cancellationToken);
+    return result.Succeeded ? Results.Ok(result.Value) : Results.BadRequest(new { error = result.Error });
+}).RequireAuthorization();
+
 app.MapGet("/api/communities/{communityId:guid}/profiles", async (
     Guid communityId,
     [AsParameters] ProfileSearchQuery query,
@@ -176,7 +284,7 @@ app.MapGet("/api/communities/{communityId:guid}/profiles", async (
     if (!await access.IsMemberAsync(communityId, userId.Value, cancellationToken))
         return Results.Forbid();
 
-    var result = await directory.SearchAsync(communityId, query, cancellationToken);
+    var result = await directory.SearchAsync(communityId, userId.Value, query, cancellationToken);
     return Results.Ok(result);
 })
 .WithName("SearchCommunityProfiles")

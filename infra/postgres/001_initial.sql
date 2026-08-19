@@ -54,8 +54,14 @@ CREATE TABLE profiles (
     course varchar(120) NULL,
     headline varchar(140) NULL,
     bio varchar(800) NULL,
+    project_name varchar(120) NULL,
+    project_summary varchar(500) NULL,
+    can_help_with varchar(300) NULL,
+    looking_for varchar(300) NULL,
     contact_url varchar(300) NULL,
     available_for_team boolean NOT NULL DEFAULT false,
+    team_situation varchar(30) NOT NULL DEFAULT 'LookingForTeam'
+        CHECK (team_situation IN ('LookingForTeam', 'HasTeam', 'NotLooking')),
     visible_in_directory boolean NOT NULL DEFAULT true,
     updated_at timestamptz NOT NULL DEFAULT now(),
     UNIQUE (community_id, user_id)
@@ -85,6 +91,46 @@ CREATE TABLE profile_interests (
     PRIMARY KEY (profile_id, interest_id)
 );
 
+CREATE TABLE teams (
+    id uuid PRIMARY KEY,
+    community_id uuid NOT NULL REFERENCES communities(id) ON DELETE CASCADE,
+    institution_id uuid NOT NULL REFERENCES institutions(id),
+    name varchar(120) NOT NULL,
+    project_summary varchar(500) NULL,
+    is_open boolean NOT NULL DEFAULT true,
+    created_by_user_id uuid NOT NULL REFERENCES users(id),
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE TABLE team_members (
+    team_id uuid NOT NULL REFERENCES teams(id) ON DELETE CASCADE,
+    community_id uuid NOT NULL REFERENCES communities(id) ON DELETE CASCADE,
+    user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    role varchar(20) NOT NULL CHECK (role IN ('Owner', 'Member')),
+    joined_at timestamptz NOT NULL DEFAULT now(),
+    PRIMARY KEY (team_id, user_id),
+    UNIQUE (community_id, user_id)
+);
+
+CREATE TABLE team_desired_skills (
+    team_id uuid NOT NULL REFERENCES teams(id) ON DELETE CASCADE,
+    skill_id uuid NOT NULL REFERENCES skills(id),
+    PRIMARY KEY (team_id, skill_id)
+);
+
+CREATE TABLE team_join_requests (
+    id uuid PRIMARY KEY,
+    team_id uuid NOT NULL REFERENCES teams(id) ON DELETE CASCADE,
+    requester_profile_id uuid NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+    note varchar(300) NULL,
+    status varchar(20) NOT NULL DEFAULT 'Pending'
+        CHECK (status IN ('Pending', 'Accepted', 'Declined', 'Cancelled')),
+    created_at timestamptz NOT NULL DEFAULT now(),
+    responded_at timestamptz NULL,
+    UNIQUE (team_id, requester_profile_id)
+);
+
 CREATE TABLE connection_requests (
     id uuid PRIMARY KEY,
     community_id uuid NOT NULL REFERENCES communities(id) ON DELETE CASCADE,
@@ -104,3 +150,6 @@ CREATE INDEX ix_profiles_course_trgm ON profiles USING gin (course gin_trgm_ops)
 CREATE INDEX ix_skills_name_trgm ON skills USING gin (name gin_trgm_ops);
 CREATE INDEX ix_connection_requests_recipient_status ON connection_requests (recipient_profile_id, status);
 CREATE INDEX ix_community_invitations_community_email ON community_invitations (community_id, email);
+CREATE INDEX ix_teams_community_institution_open ON teams (community_id, institution_id, is_open);
+CREATE INDEX ix_team_members_user ON team_members (user_id);
+CREATE INDEX ix_team_join_requests_team_status ON team_join_requests (team_id, status);
