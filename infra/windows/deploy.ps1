@@ -41,10 +41,20 @@ finally {
 Get-ChildItem -LiteralPath '.\src\firma-connect-web\dist' -Force |
     Copy-Item -Destination $WebPublishPath -Recurse -Force
 
-if (-not (Get-Service -Name $ApiServiceName -ErrorAction SilentlyContinue)) {
-    throw "O serviço '$ApiServiceName' não existe. Instale o serviço da API antes do primeiro deploy."
+if (-not (Get-Command pm2 -ErrorAction SilentlyContinue)) {
+    throw 'PM2 não foi encontrado na VPS. Instale-o antes do deploy.'
 }
 
-Restart-Service -Name $ApiServiceName -Force
+pm2 describe firma-api *> $null
+if ($LASTEXITCODE -eq 0) {
+    pm2 restart firma-api --update-env
+}
+else {
+    pm2 start 'C:\Program Files\dotnet\dotnet.exe' `
+        --name firma-api `
+        --interpreter none `
+        -- 'C:\opt\firma-connect\deploy\api\Firma.Connect.Api.dll' --urls http://127.0.0.1:8080
+}
+pm2 save
 
 Write-Host 'Deploy concluído com sucesso.'

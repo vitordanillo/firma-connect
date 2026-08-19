@@ -22,7 +22,7 @@ Antes do primeiro deploy, a VPS precisa ter:
 - PostgreSQL;
 - Caddy configurado para servir `C:\opt\firma-connect\deploy\web` e encaminhar a API para o Kestrel;
 - o repositório clonado em `C:\opt\firma-connect`;
-- um serviço Windows chamado `FirmaConnectApi` executando a API publicada;
+- PM2 gerenciando um processo chamado `firma-api` para executar a API publicada;
 - um arquivo `.env` de produção em `C:\opt\firma-connect`.
 
 O workflow não cria serviços, instala dependências nem cria credenciais. Essas etapas são deliberadamente separadas para evitar que uma execução automática altere a infraestrutura sem revisão.
@@ -36,6 +36,6 @@ Cada push na branch `main` executa:
 3. publicação da API com `dotnet publish`;
 4. instalação das dependências e build do frontend;
 5. cópia do frontend para o diretório servido pelo Caddy;
-6. reinício do serviço `FirmaConnectApi`.
+6. reinício do processo `firma-api` no PM2.
 
 O uso de senha é compatível com a VPS atual, mas uma chave SSH dedicada continua sendo a alternativa recomendada para reduzir exposição da porta SSH.
