@@ -39,7 +39,9 @@ O banco usa UUIDs, `timestamptz`, `citext` para e-mails e índices nas colunas d
 
 `GET /api/communities/{communityId}/profiles?institutionId=&availableForTeam=&query=&page=&pageSize=` lista perfis visíveis no diretório. O primeiro endpoint foi implementado, mas ainda precisa de autenticação e verificação de associação à comunidade antes de produção.
 
-`POST /api/communities/{communityId}/profiles` cria ou atualiza o próprio perfil.
+`GET|PUT|DELETE /api/communities/{communityId}/profiles/me` consulta, salva ou remove o próprio perfil.
+
+`GET /api/institutions?query=&page=&pageSize=` pesquisa o catálogo normalizado de instituições.
 
 `POST /api/connection-requests` envia pedido; `POST /api/connection-requests/{id}/accept` aceita; `POST /api/connection-requests/{id}/decline` recusa.
 
