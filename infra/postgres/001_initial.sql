@@ -14,8 +14,20 @@ CREATE TABLE users (
     id uuid PRIMARY KEY,
     email citext NOT NULL UNIQUE,
     display_name varchar(100) NOT NULL,
+    password_hash varchar(500) NOT NULL,
     created_at timestamptz NOT NULL DEFAULT now(),
     deleted_at timestamptz NULL
+);
+
+CREATE TABLE community_invitations (
+    id uuid PRIMARY KEY,
+    community_id uuid NOT NULL REFERENCES communities(id) ON DELETE CASCADE,
+    email citext NOT NULL,
+    token_hash varchar(64) NOT NULL UNIQUE,
+    created_by_user_id uuid NOT NULL REFERENCES users(id),
+    expires_at timestamptz NOT NULL,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    used_at timestamptz NULL
 );
 
 CREATE TABLE institutions (
@@ -91,3 +103,4 @@ CREATE INDEX ix_profiles_community_institution_team ON profiles (community_id, i
 CREATE INDEX ix_profiles_course_trgm ON profiles USING gin (course gin_trgm_ops);
 CREATE INDEX ix_skills_name_trgm ON skills USING gin (name gin_trgm_ops);
 CREATE INDEX ix_connection_requests_recipient_status ON connection_requests (recipient_profile_id, status);
+CREATE INDEX ix_community_invitations_community_email ON community_invitations (community_id, email);

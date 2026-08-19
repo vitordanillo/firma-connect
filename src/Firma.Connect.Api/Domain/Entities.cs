@@ -13,8 +13,34 @@ public sealed class User
     public Guid Id { get; init; } = Guid.NewGuid();
     public string Email { get; set; } = string.Empty;
     public string DisplayName { get; set; } = string.Empty;
+    public string PasswordHash { get; set; } = string.Empty;
     public DateTimeOffset CreatedAt { get; init; } = DateTimeOffset.UtcNow;
     public DateTimeOffset? DeletedAt { get; set; }
+}
+
+public enum MembershipRole { Member, Admin }
+
+public sealed class CommunityMembership
+{
+    public Guid Id { get; init; } = Guid.NewGuid();
+    public Guid CommunityId { get; set; }
+    public Guid UserId { get; set; }
+    public MembershipRole Role { get; set; } = MembershipRole.Member;
+    public DateTimeOffset JoinedAt { get; init; } = DateTimeOffset.UtcNow;
+}
+
+public sealed class CommunityInvitation
+{
+    public Guid Id { get; init; } = Guid.NewGuid();
+    public Guid CommunityId { get; set; }
+    public string Email { get; set; } = string.Empty;
+    public string TokenHash { get; set; } = string.Empty;
+    public Guid CreatedByUserId { get; set; }
+    public DateTimeOffset ExpiresAt { get; set; }
+    public DateTimeOffset CreatedAt { get; init; } = DateTimeOffset.UtcNow;
+    public DateTimeOffset? UsedAt { get; set; }
+
+    public bool CanBeUsedAt(DateTimeOffset now) => UsedAt is null && ExpiresAt > now;
 }
 
 public sealed class Institution
