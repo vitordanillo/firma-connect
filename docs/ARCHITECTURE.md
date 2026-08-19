@@ -45,6 +45,8 @@ O banco usa UUIDs, `timestamptz`, `citext` para e-mails e índices nas colunas d
 
 `GET|POST /api/communities/{communityId}/teams` pesquisa equipes abertas ou cria uma equipe vinculada à instituição do responsável.
 
+`GET /api/communities/{communityId}/teams/me` retorna a equipe e o papel do usuário autenticado.
+
 `GET /api/communities/{communityId}/team-discovery/summary` resume participantes, pessoas procurando equipe e equipes abertas da instituição do usuário.
 
 `POST /api/communities/{communityId}/teams/{teamId}/requests` solicita entrada em uma equipe.
