@@ -1,0 +1,24 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Firma.Connect.Api", "src\Firma.Connect.Api\Firma.Connect.Api.csproj", "{4CF6B51F-769A-4DC4-B1D1-801B0E3EA11F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Firma.Connect.Api.Tests", "tests\Firma.Connect.Api.Tests\Firma.Connect.Api.Tests.csproj", "{5E55C2D4-1E76-44DF-AB8B-D80DD278B640}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4CF6B51F-769A-4DC4-B1D1-801B0E3EA11F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4CF6B51F-769A-4DC4-B1D1-801B0E3EA11F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4CF6B51F-769A-4DC4-B1D1-801B0E3EA11F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4CF6B51F-769A-4DC4-B1D1-801B0E3EA11F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5E55C2D4-1E76-44DF-AB8B-D80DD278B640}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5E55C2D4-1E76-44DF-AB8B-D80DD278B640}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5E55C2D4-1E76-44DF-AB8B-D80DD278B640}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5E55C2D4-1E76-44DF-AB8B-D80DD278B640}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
