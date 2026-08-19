@@ -1,7 +1,7 @@
 param(
     [string]$RepoPath = 'C:\opt\firma-connect',
     [string]$ApiPublishPath = 'C:\opt\firma-connect\deploy\api',
-    [string]$WebPublishPath = 'C:\inetpub\wwwroot\firma-connect',
+    [string]$WebPublishPath = 'C:\opt\firma-connect\deploy\web',
     [string]$ApiServiceName = 'FirmaConnectApi'
 )
 

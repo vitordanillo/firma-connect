@@ -20,7 +20,7 @@ Antes do primeiro deploy, a VPS precisa ter:
 - .NET 8 SDK;
 - Node.js LTS e npm;
 - PostgreSQL;
-- IIS com o site apontando para `C:\inetpub\wwwroot\firma-connect`;
+- Caddy configurado para servir `C:\opt\firma-connect\deploy\web` e encaminhar a API para o Kestrel;
 - o repositório clonado em `C:\opt\firma-connect`;
 - um serviço Windows chamado `FirmaConnectApi` executando a API publicada;
 - um arquivo `.env` de produção em `C:\opt\firma-connect`.
@@ -35,7 +35,7 @@ Cada push na branch `main` executa:
 2. atualização do repositório para `origin/main`;
 3. publicação da API com `dotnet publish`;
 4. instalação das dependências e build do frontend;
-5. cópia do frontend para o IIS;
+5. cópia do frontend para o diretório servido pelo Caddy;
 6. reinício do serviço `FirmaConnectApi`.
 
 O uso de senha é compatível com a VPS atual, mas uma chave SSH dedicada continua sendo a alternativa recomendada para reduzir exposição da porta SSH.
