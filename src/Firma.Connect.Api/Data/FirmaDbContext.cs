@@ -31,7 +31,10 @@ public sealed class FirmaDbContext(DbContextOptions<FirmaDbContext> options) : D
         modelBuilder.Entity<Interest>().HasIndex(x => x.NormalizedName).IsUnique();
         modelBuilder.Entity<CommunityMembership>().ToTable("communities_memberships");
         modelBuilder.Entity<CommunityMembership>().HasIndex(x => new { x.CommunityId, x.UserId }).IsUnique();
-        modelBuilder.Entity<CommunityMembership>().Property(x => x.Role).HasConversion<string>();
+        modelBuilder.Entity<CommunityMembership>().Property(x => x.Role)
+            .HasConversion(
+                role => role.ToString().ToLowerInvariant(),
+                value => Enum.Parse<MembershipRole>(value, true));
         modelBuilder.Entity<CommunityInvitation>().ToTable("community_invitations");
         modelBuilder.Entity<CommunityInvitation>().HasIndex(x => x.TokenHash).IsUnique();
         modelBuilder.Entity<CommunityInvitation>().HasIndex(x => new { x.CommunityId, x.Email });
