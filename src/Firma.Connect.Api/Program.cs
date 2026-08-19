@@ -34,6 +34,7 @@ builder.Services.AddScoped<CommunityAccessService>();
 builder.Services.AddScoped<InvitationService>();
 builder.Services.AddScoped<TeamService>();
 builder.Services.AddScoped<TeamDiscoveryService>();
+builder.Services.AddScoped<BootstrapSeeder>();
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection(JwtOptions.SectionName));
@@ -63,6 +64,12 @@ builder.Services
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
+
+using (var bootstrapScope = app.Services.CreateScope())
+{
+    var bootstrap = bootstrapScope.ServiceProvider.GetRequiredService<BootstrapSeeder>();
+    await bootstrap.SeedAsync(app.Configuration, CancellationToken.None);
+}
 
 app.UseHttpsRedirection();
 app.UseAuthentication();
