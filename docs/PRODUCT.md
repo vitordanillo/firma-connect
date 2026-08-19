@@ -24,16 +24,20 @@ O primeiro cenário de validação são participantes de uma comunidade ligada a
 ## Jornada MVP
 
 1. A pessoa recebe um link de convite da comunidade.
-2. Cria perfil, escolhe instituição, curso, competências, interesses e disponibilidade para equipe.
-3. Pesquisa participantes por instituição e filtros.
-4. Abre um perfil e envia pedido de conexão com uma nota curta.
-5. O destinatário aceita ou recusa; após aceite, ambos veem os dados de contato que optaram por compartilhar.
+2. Cria perfil, escolhe instituição, curso, competências, interesses, projeto e situação de equipe.
+3. Encontra primeiro pessoas e equipes abertas da própria instituição.
+4. Pesquisa participantes por curso, competência, projeto e necessidade.
+5. Cria uma equipe ou solicita entrada em uma equipe aberta.
+6. O responsável aceita ou recusa respeitando instituição, limite de integrantes e vínculo único.
+7. Para networking além da equipe, abre um perfil e envia pedido de conexão.
 
 ## Regras do produto
 
 - Perfil e contatos são voluntários; a pessoa pode ocultar-se do diretório e apagar a conta.
 - Somente membros da mesma comunidade veem os perfis dela.
 - Busca de equipe deve exibir primeiro pessoas da mesma instituição, mas não afirma elegibilidade oficial: o regulamento vigente prevalece.
+- Equipes do piloto possuem no máximo quatro integrantes e não aceitam participantes de outra instituição.
+- A plataforma permite equipes em formação com uma pessoa; a composição válida para o programa continua sujeita ao regulamento oficial.
 - O produto não coleta mensagens nem membros do WhatsApp automaticamente.
 - Não usar nome, logotipo ou promessa de parceria com Sebrae sem autorização escrita.
 
@@ -44,6 +48,8 @@ O primeiro cenário de validação são participantes de uma comunidade ligada a
 - buscas por instituição;
 - pedidos de conexão enviados e aceitos;
 - número de pessoas que relatam ter encontrado equipe ou colaboração.
+- equipes criadas e solicitações de entrada aceitas;
+- tempo entre cadastro e primeira conexão útil.
 
 ## Fora do MVP
 

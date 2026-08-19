@@ -37,15 +37,27 @@ O banco usa UUIDs, `timestamptz`, `citext` para e-mails e índices nas colunas d
 
 `POST /api/communities/{communityId}/invitations` cria um convite de três dias; exige administrador autenticado.
 
-`GET /api/communities/{communityId}/profiles?institutionId=&availableForTeam=&query=&page=&pageSize=` lista perfis visíveis no diretório. O primeiro endpoint foi implementado, mas ainda precisa de autenticação e verificação de associação à comunidade antes de produção.
+`GET /api/communities/{communityId}/profiles?institutionId=&teamSituation=&skill=&interest=&query=` lista perfis visíveis e prioriza a instituição do usuário.
 
 `GET|PUT|DELETE /api/communities/{communityId}/profiles/me` consulta, salva ou remove o próprio perfil.
 
 `GET /api/institutions?query=&page=&pageSize=` pesquisa o catálogo normalizado de instituições.
 
+`GET|POST /api/communities/{communityId}/teams` pesquisa equipes abertas ou cria uma equipe vinculada à instituição do responsável.
+
+`GET /api/communities/{communityId}/team-discovery/summary` resume participantes, pessoas procurando equipe e equipes abertas da instituição do usuário.
+
+`POST /api/communities/{communityId}/teams/{teamId}/requests` solicita entrada em uma equipe.
+
+`GET /api/communities/{communityId}/teams/{teamId}/requests` lista solicitações para o responsável.
+
+`POST /api/communities/{communityId}/team-requests/{requestId}/accept|decline` responde à solicitação.
+
 `POST /api/connection-requests` envia pedido; `POST /api/connection-requests/{id}/accept` aceita; `POST /api/connection-requests/{id}/decline` recusa.
 
 O diretório e a criação de convites verificam a associação à comunidade no banco em cada requisição. O token não concede acesso a uma comunidade por si só.
+
+As regras de equipe verificam no backend: mesma instituição, máximo de quatro integrantes, vaga aberta, responsável autorizado e ausência de outra equipe na mesma comunidade.
 
 ## Estratégia de testes
 
